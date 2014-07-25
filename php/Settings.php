@@ -26,11 +26,11 @@ class Settings {
             switch ($_SERVER['HTTP_HOST']) {
                 case 'localhost':
                     // configurazione locale
-                    self::$appPath = 'http://' . $_SERVER['HTTP_HOST'] . '/esAMM2014/esami14/';
+                    self::$appPath = 'http://' . $_SERVER['HTTP_HOST'] . '/DS_esammi/';
                     break;
                 case 'spano.sc.unica.it':
                     // configurazione pubblica
-                    self::$appPath = 'http://' . $_SERVER['HTTP_HOST'] . '/amm2014/ferruvich/amm/';
+                    self::$appPath = 'http://' . $_SERVER['HTTP_HOST'] . '/amm14_ferruDanieleStef/';
                     break;
 
                 default:
