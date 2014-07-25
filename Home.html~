@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Piattaforma esami - Homepage</title>
+        <meta name="author" content="Daniele Stefano Ferru -47783">
+        <base href="file:///home/amm/development/amm/">
+        <link rel="stylesheet" type="text/css" href="css/st_home.css">
+    </head>
+    <body>
+        <header>
+        	<div class="social">
+        		<ul>
+        			<li id="facebook"><a href="www.facebook.com">facebook</a></li>
+        			<li id="twitter"><a href="https://twitter.com/">twitter</a></li>
+        		</ul>
+        	</div>
+        	<h1>Esami</h1>
+		</header>
+        <p>Benvenuto nella piattaforma per la gestione degli esami universitari</p>
+        <div id="menu">
+            Navigazione:
+            <ul>
+                <li><a href="Home.html">Home</a></li>
+                <li><a href="LR_studente.html">Login o Registrazione utente</a></li>
+                <li><a href="LR_professore.html">Login o Registrazione professore</a></li>
+            </ul>
+        </div>
+	</body>
+</html>
