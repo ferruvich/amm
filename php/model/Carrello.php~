@@ -1,0 +1,40 @@
+<?
+
+include_once 'Copia.php';
+
+class Carrello{
+	private $copie = array();
+
+	public function __construct(){};
+	
+	public function &getCopie(){
+		return $copie;
+	}
+
+	public function aggiungiCopia(Copia $copy){
+		$copie[] = $copy;
+		return true;
+		$copie[count($copie)-1]->aggiungiACarrello();
+	}
+
+	public function getTotale(){
+		$totale = 0;
+		foreach($copie as $copia){	
+			$totale += $copia->getVideogioco()->getPrezzo();
+		}
+		return $totale;
+	}
+
+	public function togliCopiaDaCarrello(Copia $copy){
+		i = 0;
+		foreach($copie as $copia){	
+			if($copia->equals($copy)){
+				$copia->togliDaCarrello();
+				array_splice($copie, i, 1);
+			}
+			i++;
+		}
+	}
+}
+
+?>

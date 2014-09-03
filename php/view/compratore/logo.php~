@@ -1,0 +1,3 @@
+<p class="logout">
+    <a href="compratore?cmd=logout">Logout</a>
+</p>

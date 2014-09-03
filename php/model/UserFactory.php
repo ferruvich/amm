@@ -1,0 +1,487 @@
+<?php
+
+include_once 'User.php';
+include_once 'Venditore.php';
+include_once 'Compratore.php';
+include_once 'Db.php';
+
+class UserFactory {
+
+    private static $singleton;
+
+    private function __constructor() {
+        
+    }
+
+    public static function instance() {
+        if (!isset(self::$singleton)) {
+            self::$singleton = new UserFactory();
+        }
+
+        return self::$singleton;
+    }
+
+    public function caricaUtente($username, $password) {
+
+        $mysqli = Db::getInstance()->connectDb();
+        if (!isset($mysqli)) {
+            error_log("[loadUser] impossibile inizializzare il database");
+            $mysqli->close();
+            return null;
+        }
+		//Cerco un compratore
+        $query = "SELECT compratore.id compratore_id,
+            compratore.nome compratore_nome,
+            compratore.cognome compratore_cognome,
+            compratore.email compratore_email,
+            compratore.citta compratore_citta,
+            compratore.via compratore_via,
+            compratore.cap compratore_cap,
+            compratore.provincia compratore_provincia,
+            compratore.ncivico compratore_numero_civico,
+			compratore.username compratore_username,
+			compratore.password compratore_password
+            FROM compratore 
+            WHERE compratore.username = ? AND compratore.password = ?";
+       	$stmt = $mysqli->prepare($query);
+        if (!isset($stmt)) {
+            error_log("[loadUser] impossibile" .
+                    " inizializzare il prepared statement");
+            $mysqli->close();
+            return null;
+        }
+        if (!$stmt->bind_param("ss", $username, $password)) {
+            error_log("[loadUser] impossibile" .
+                    " effettuare il binding in input");
+            $mysqli->close();
+            return null;
+        }
+
+        $compratore = self::caricaCompratoreDaStmt($stmt);
+        if (isset($compratore)) {
+            // ho trovato un compratore
+            $mysqli->close();
+            return $compratore;
+        }
+
+        // ora cerco un venditore
+        $query = "SELECT 
+               venditore.id venditore_id,
+               venditore.nome venditore_nome,
+               venditore.cognome venditore_cognome,
+               venditore.email venditore_email,
+               venditore.citta venditore_citta,
+               venditore.cap venditore_cap,
+               venditore.via venditore_via,
+               venditore.provincia venditore_provincia,
+               venditore.ncivico venditore_numero_civico,
+			   venditore.username venditore_username,
+			   venditore.password venditore_password
+               
+               FROM venditore 
+               WHERE venditore.username = ? AND venditore.password = ?";
+        $stmt = $mysqli->stmt_init();
+        $stmt->prepare($query);
+        if (!$stmt) {
+            error_log("[loadUser] impossibile" .
+                    " inizializzare il prepared statement");
+            $mysqli->close();
+            return null;
+        }
+
+        if (!$stmt->bind_param('ss', $username, $password)) {
+            error_log("[loadUser] impossibile" .
+                    " effettuare il binding in input");
+            $mysqli->close();
+            return null;
+        }
+
+        $venditore = self::caricaVenditoreDaStmt($stmt);
+        if (isset($venditore)) {
+            // ho trovato un venditore
+            $mysqli->close();
+            return $venditore;
+        }
+    }
+
+    /**
+     * Restituisce un array con i Venditori presenti nel sistema
+     * @return array
+     */
+    public function &getListavenditori() {
+        $venditori = array();
+        $query = "select 
+               venditore.id venditore_id,
+               venditore.nome venditore_nome,
+               venditore.cognome venditore_cognome,
+               venditore.email venditore_email,
+               venditore.citta venditore_citta,
+               venditore.cap venditore_cap,
+               venditore.via venditore_via,
+               venditore.provincia venditore_provincia,
+               venditore.ncivico venditore_numero_civico,
+			   venditore.username venditore_username,
+			   venditore.password venditore_password
+               
+               from venditore";
+        $mysqli = Db::getInstance()->connectDb();
+        if (!isset($mysqli)) {
+            error_log("[getListaVenditori] impossibile inizializzare il database");
+            $mysqli->close();
+            return $venditori;
+        }
+        $result = $mysqli->query($query);
+        if ($mysqli->errno > 0) {
+            error_log("[getListaVenditori] impossibile eseguire la query");
+            $mysqli->close();
+            return $venditori;
+        }
+
+        while ($row = $result->fetch_array()) {
+            $venditori[] = self::creaVenditoreDaArray($row);
+        }
+
+        $mysqli->close();
+        return $venditori;
+    }
+
+    /**
+     * Restituisce la lista dei compratori presenti nel sistema
+     * @return array
+     */
+    public function &getListaCompratori() {
+        $compratori = array();
+        $query = "select * from compratore";
+        $mysqli = Db::getInstance()->connectDb();
+        if (!isset($mysqli)) {
+            error_log("[getListaCompratori] impossibile inizializzare il database");
+            $mysqli->close();
+            return $compratori;
+        }
+        $result = $mysqli->query($query);
+        if ($mysqli->errno > 0) {
+            error_log("[getListaCompratori] impossibile eseguire la query");
+            $mysqli->close();
+            return $compratori;
+        }
+
+        while ($row = $result->fetch_array()) {
+            $compratori[] = self::creaCompratoreDaArray($row);
+        }
+
+        return $compratori;
+    }
+
+    public function cercaUtentePerId($id, $role) {
+        $intval = filter_var($id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        if (!isset($intval)) {
+            return null;
+        }
+        $mysqli = Db::getInstance()->connectDb();
+        if (!isset($mysqli)) {
+            error_log("[cercaUtentePerId] impossibile inizializzare il database");
+            $mysqli->close();
+            return null;
+        }
+
+        switch ($role) {
+            case User::Compratore:
+                $query = "select 
+			compratore.id compratore_id,
+            compratore.nome studenti_nome,
+            compratore.cognome studenti_cognome,
+            compratore.email compratore_email,
+            compratore.citta compratore_citta,
+            compratore.via compratore_via,
+            compratore.cap compratore_cap,
+            compratore.provincia compratore_provincia,
+            compratore.ncivico compratore_numero_civico,
+			compratore.username compratore_username,
+			compratore.password compratore_password
+
+            from compratore
+            where compratore.id = ?";
+                $stmt = $mysqli->stmt_init();
+                $stmt->prepare($query);
+                if (!$stmt) {
+                    error_log("[cercaUtentePerId] impossibile" .
+                            " inizializzare il prepared statement");
+                    $mysqli->close();
+                    return null;
+                }
+
+                if (!$stmt->bind_param('i', $intval)) {
+                    error_log("[cercaUtentePerId] impossibile" .
+                            " effettuare il binding in input");
+                    $mysqli->close();
+                    return null;
+                }
+
+                return self::caricaCompratoreDaStmt($stmt);
+                break;
+
+            case User::Venditore:
+                $query = "select 
+               venditore.id venditore_id,
+               venditore.nome venditore_nome,
+               venditore.cognome venditore_cognome,
+               venditore.email venditore_email,
+               venditore.citta venditore_citta,
+               venditore.cap venditore_cap,
+               venditore.via venditore_via,
+               venditore.provincia venditore_provincia,
+               venditore.ncivico venditore_numero_civico,
+			   venditore.username venditore_username,
+			   venditore.password venditore_password
+               
+               from venditore
+               where venditore.id = ?";
+                $stmt = $mysqli->stmt_init();
+                $stmt->prepare($query);
+                if (!$stmt) {
+                    error_log("[cercaUtentePerId] impossibile" .
+                            " inizializzare il prepared statement");
+                    $mysqli->close();
+                    return null;
+                }
+
+                if (!$stmt->bind_param('i', $intval)) {
+                    error_log("[loadUser] impossibile" .
+                            " effettuare il binding in input");
+                    $mysqli->close();
+                    return null;
+                }
+
+                $toRet =  self::caricaVenditoreDaStmt($stmt);
+                $mysqli->close();
+                return $toRet;
+                break;
+
+            default: return null;
+        }
+    }
+
+    public function creaCompratoreDaArray($row) {
+        $compratore = new Compratore();
+        $compratore->setId($row['compratore_id']);
+        $compratore->setNome($row['compratore_nome']);
+        $compratore->setCognome($row['compratore_cognome']);
+        $compratore->setCitta($row['compratore_citta']);
+        $compratore->setCap($row['compratore_cap']);
+        $compratore->setVia($row['compratore_via']);
+        $compratore->setEmail($row['compratore_email']);
+        $compratore->setProvincia($row['compratore_provincia']);
+        $compratore->setNumeroCivico($row['compratore_numero_civico']);
+        $compratore->setRuolo(User::Compratore);
+        $compratore->setUsername($row['compratore_username']);
+        $compratore->setPassword($row['compratore_password']);
+        return $compratore;
+    }
+
+    public function creaVenditoreDaArray($row) {
+        $venditore = new Venditore();
+        $venditore->setId($row['venditore_id']);
+        $venditore->setNome($row['venditore_nome']);
+        $venditore->setCognome($row['venditore_cognome']);
+        $venditore->setEmail($row['venditore_email']);
+        $venditore->setCap($row['venditore_cap']);
+        $venditore->setCitta($row['venditore_citta']);
+        $venditore->setVia($row['venditore_via']);
+        $venditore->setProvincia($row['venditore_provincia']);
+        $venditore->setNumeroCivico($row['venditore_numero_civico']);
+        $venditore->setRuolo(User::Venditore);
+        $venditore->setUsername($row['venditore_username']);
+        $venditore->setPassword($row['venditore_password']);
+        return $venditore;
+    }
+
+    /**
+     * Salva i dati relativi ad un utente sul db
+     */
+    public function salva(User $user) {
+        $mysqli = Db::getInstance()->connectDb();
+        if (!isset($mysqli)) {
+            error_log("[salva] impossibile inizializzare il database");
+            $mysqli->close();
+            return 0;
+        }
+
+        $stmt = $mysqli->stmt_init();
+        $count = 0;
+        switch ($user->getRuolo()) {
+            case User::Compratore:
+                $count = $this->salvaCompratore($user, $stmt);
+                break;
+            case User::Venditore:
+                $count = $this->salvaVenditore($user, $stmt);
+        }
+
+        $stmt->close();
+        $mysqli->close();
+        return $count;
+    }
+
+    private function salvaCompratore(Compratore $buyer, mysqli_stmt $stmt) {
+        $query = " update compratore set 
+                    password = ?,
+                    nome = ?,
+                    cognome = ?,
+                    email = ?,
+                    ncivico = ?,
+                    citta = ?,
+                    provincia = ?,
+                    cap = ?,
+                    via = ?
+                    where compratore.id = ?
+                    ";
+        $stmt->prepare($query);
+        if (!$stmt) {
+            error_log("[salvaCompratore] impossibile" .
+                    " inizializzare il prepared statement");
+            return 0;
+        }
+
+        if (!$stmt->bind_param('ssssissisi', 
+								$buyer->getPassword(),
+								$buyer->getNome(),
+								$buyer->getCognome(),
+								$buyer->getEmail(),
+								$buyer->getNumeroCivico(),
+								$buyer->getCitta(),
+								$buyer->getProvincia(),
+								$buyer->getCap(),
+								$buyer->getVia(),
+								$buyer->getId())) {
+            error_log("[salvaCompratore] impossibile" .
+                    " effettuare il binding in input");
+            return 0;
+        }
+
+        if (!$stmt->execute()) {
+            error_log("[salvaCompratore] impossibile" .
+                    " eseguire lo statement");
+            return 0;
+        }
+        return $stmt->affected_rows;
+    }
+    
+    private function salvaVenditore(Venditore $seller, mysqli_stmt $stmt) {
+        $query = " update venditore set 
+                    password = ?,
+                    nome = ?,
+                    cognome = ?,
+                    email = ?,
+                    citta = ?,
+                    provincia = ?,
+                    cap = ?,
+                    via = ?,
+                    ncivico = ?
+                    where venditore.id = ?
+                    ";
+        $stmt->prepare($query);
+        if (!$stmt) {
+            error_log("[salvaVenditore] impossibile" .
+                    " inizializzare il prepared statement");
+            return 0;
+        }
+
+        if (!$stmt->bind_param('ssssssssii', 
+                $seller->getPassword(), 
+                $seller->getNome(), 
+                $seller->getCognome(), 
+                $seller->getEmail(), 
+                $seller->getCitta(),
+                $seller->getProvincia(),
+                $seller->getCap(), 
+                $seller->getVia(), 
+                $seller->getNumeroCivico(), 
+                $seller->getId())) {
+            error_log("[salvaVenditore] impossibile" .
+                    " effettuare il binding in input");
+            return 0;
+        }
+
+        if (!$stmt->execute()) {
+            error_log("[salvaVenditore] impossibile" .
+                    " eseguire lo statement");
+            return 0;
+        }
+
+        return $stmt->affected_rows;
+    }
+
+    private function caricaVenditoreDaStmt(mysqli_stmt $stmt) {
+
+        if (!$stmt->execute()) {
+            error_log("[caricaVenditoreDaStmt] impossibile" .
+                    " eseguire lo statement");
+            return null;
+        }
+
+        $row = array();
+        $bind = $stmt->bind_result(
+                $row['venditore_id'], 
+                $row['venditore_nome'], 
+                $row['venditore_cognome'], 
+                $row['venditore_email'], 
+                $row['venditore_citta'],
+                $row['venditore_cap'],
+                $row['venditore_via'],
+                $row['venditore_provincia'], 
+                $row['venditore_numero_civico'],
+				$row['venditore_username'],
+				$row['venditore_password']);
+        if (!$bind) {
+            error_log("[caricaVenditoreDaStmt] impossibile" .
+                    " effettuare il binding in output");
+            return null;
+        }
+
+        if (!$stmt->fetch()) {
+            return null;
+        }
+
+        $stmt->close();
+
+        return self::creaVenditoreDaArray($row);
+    }
+
+    private function caricaCompratoreDaStmt(mysqli_stmt $stmt) {
+
+        if (!$stmt->execute()) {
+            error_log("[caricaStudenteDaStmt] impossibile" .
+                    " eseguire lo statement");
+            return null;
+        }
+
+        $row = array();
+        $bind = $stmt->bind_result(
+                $row['compratore_id'],
+				$row['compratore_nome'],
+				$row['compratore_cognome'],
+				$row['compratore_email'],
+				$row['compratore_citta'],
+				$row['compratore_via'],
+				$row['compratore_cap'],
+				$row['compratore_provincia'],
+				$row['compratore_numero_civico'],
+				$row['compratore_username'],
+				$row['compratore_password']);
+        if (!$bind) {
+            error_log("[caricaCompratoreDaStmt] impossibile" .
+                    " effettuare il binding in output");
+            return null;
+        }
+
+        if (!$stmt->fetch()) {
+            return null;
+        }
+
+        $stmt->close();
+
+        return self::creaCompratoreDaArray($row);
+    }
+
+}
+
+?>

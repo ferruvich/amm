@@ -1,0 +1,59 @@
+<?php
+
+include_once 'Venditore.php'
+include_once 'Compratore.php'
+include_once 'Film.php'
+
+class Dvd{
+	private $id;
+	private $Film;
+	private $idVenditore;
+	private $idCompratore = -1;
+
+	public function __construct() {
+    }
+
+	public function getId(){
+		return $this->id;
+	}
+	public function setId($id) {
+        $intVal = filter_var($id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        if (!isset($intVal)) {
+            return false;
+        }
+        $this->id = $intVal;
+        return true;
+    }
+
+	public function getFilm() {
+        return $this->film;
+    }
+    public function setFilm(Film $film) {
+        $this->film = $film;
+		return true;
+    }
+
+	public function getVenditore(){
+		return $this->idVenditore;
+	}
+	public function setVenditore($id){
+		$intVal = filter_var($id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        if (!isset($intVal)) {
+            return false;
+        }
+        $this->idVenditore = $intVal;
+        return true;
+	}
+
+	public function getCompratore(){
+		return $this->idCompratore;
+	}
+	public function setCompratore($id){
+		$intVal = filter_var($id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        if (!isset($intVal)) {
+            return false;
+        }
+        $this->idCompratore = $intVal;
+        return true;
+	}
+}
