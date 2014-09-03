@@ -1,0 +1,16 @@
+<?php
+
+include_once 'User.php';
+
+/* Classe che rappresenta il venditore
+*/
+
+class Venditore extends User{
+	 
+	public function __construct() {
+        parent::__construct();
+        $this->setRuolo(User::Venditore);
+    }
+}
+
+?>
