@@ -4,7 +4,7 @@ class Settings {
 
     // variabili di accesso per il database
     public static $db_host = 'localhost';
-    public static $db_user = 'ferruvich';
+    public static $db_user = 'ferruDanielestef';
     public static $db_password = 'upupa551';
     public static $db_name = 'amm14_ferruDanielestef';
     
@@ -20,7 +20,7 @@ class Settings {
                     break;
                 case 'spano.sc.unica.it':
                     // configurazione pubblica
-                    self::$appPath = 'http://' . $_SERVER['HTTP_HOST'] . '/amm2014/ferruDanieleStef/amm/';
+                    self::$appPath = 'http://' . $_SERVER['HTTP_HOST'] . '/amm2014/ferruDanielestef/';
                     break;
                 default:
                     self::$appPath = '';
