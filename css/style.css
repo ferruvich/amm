@@ -10,7 +10,7 @@ body{
 }
 
 #header{
-    background-color: green;
+    background-color: #009F82;
     color: white;
 
 } 
@@ -19,7 +19,7 @@ body{
 }
 
 h2, h3, h4, h5, h6 {
-    color: green;
+    color: #009F82;
     margin: 0px;
     padding-top: 10px;
     padding-bottom: 10px;
@@ -28,12 +28,12 @@ h2, h3, h4, h5, h6 {
 
 a:link{
     text-decoration: underline;
-    color: #9e1616;
+    color: #0000A1;
 }
 
 a:visited{
     text-decoration: underline;
-    color: #9e1616;
+    color: #0000A1;
 }
 
 a:hover{
