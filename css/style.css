@@ -260,6 +260,14 @@ select.menu {
     position: relative;
     display: inline-block;
     color: white;
+    background-color: #00c196;
+    height: 2em;
+    font-weight: bold;
+    border-radius: 1em;
+    border: 1px solid #1c345a;
+    min-width: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 #menu a:link, #menu a:visited{
     color: white;
