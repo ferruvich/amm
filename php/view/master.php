@@ -1,7 +1,7 @@
 <?php
 include_once 'ViewDescriptor.php';
 include_once basename(__DIR__) . '/../Settings.php';
-
+?>
     <!DOCTYPE html>
     <html>
         <head>
